@@ -1,4 +1,4 @@
-[gd_resource type="BehaviorTree" load_steps=41 format=3 uid="uid://cqluon1y1hnn5"]
+[gd_resource type="BehaviorTree" format=3 uid="uid://cqluon1y1hnn5"]
 
 [ext_resource type="Script" uid="uid://ccr43pgd4488l" path="res://demo/ai/tasks/get_first_in_group.gd" id="1_4xk1i"]
 [ext_resource type="Script" uid="uid://dbhd2dvt77sm4" path="res://demo/ai/tasks/is_aligned_with_target.gd" id="2_a8qex"]
@@ -32,6 +32,8 @@ min_duration = 0.7
 max_duration = 1.5
 
 [sub_resource type="BTAction" id="BTAction_c4cxo"]
+group = &"player"
+output_var = &"target"
 script = ExtResource("1_4xk1i")
 group = &"player"
 output_var = &"target"
@@ -51,6 +53,11 @@ blend = 0.1
 speed = 1.5
 
 [sub_resource type="BTAction" id="BTAction_op6l6"]
+target_var = &"target"
+flank_side = 1
+range_min = 400
+range_max = 1000
+position_var = &"pos"
 script = ExtResource("4_53hao")
 target_var = &"target"
 flank_side = 1
@@ -59,6 +66,10 @@ range_max = 1000
 position_var = &"pos"
 
 [sub_resource type="BTAction" id="BTAction_ycjun"]
+target_position_var = &"pos"
+speed_var = &"run_speed"
+tolerance = 50.0
+avoid_var = &"target"
 script = ExtResource("3_q4r2p")
 target_position_var = &"pos"
 speed_var = &"run_speed"
@@ -70,6 +81,7 @@ children = [SubResource("BTAction_ycjun")]
 time_limit = 7.0
 
 [sub_resource type="BTAction" id="BTAction_poqpu"]
+target_var = &"target"
 script = ExtResource("5_aexyq")
 target_var = &"target"
 
@@ -86,6 +98,11 @@ children = [SubResource("BTCooldown_2lneu")]
 run_chance = 0.3
 
 [sub_resource type="BTAction" id="BTAction_kuuw2"]
+target_var = &"target"
+flank_side = 0
+range_min = 400
+range_max = 1000
+position_var = &"shoot_pos"
 script = ExtResource("4_53hao")
 target_var = &"target"
 flank_side = 0
@@ -103,6 +120,10 @@ animation_name = &"walk"
 blend = 0.1
 
 [sub_resource type="BTAction" id="BTAction_66hsk"]
+target_position_var = &"shoot_pos"
+speed_var = &"speed"
+tolerance = 50.0
+avoid_var = &""
 script = ExtResource("3_q4r2p")
 target_position_var = &"shoot_pos"
 speed_var = &"speed"
@@ -113,10 +134,13 @@ avoid_var = &""
 children = [SubResource("BTAction_66hsk")]
 
 [sub_resource type="BTAction" id="BTAction_enw2m"]
+target_var = &"target"
 script = ExtResource("5_aexyq")
 target_var = &"target"
 
 [sub_resource type="BTCondition" id="BTCondition_1fnyc"]
+target_var = &"target"
+tolerance = 150.0
 script = ExtResource("2_a8qex")
 target_var = &"target"
 tolerance = 150.0

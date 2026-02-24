@@ -1,4 +1,4 @@
-[gd_resource type="BehaviorTree" load_steps=49 format=3 uid="uid://c2u6sljqkim0n"]
+[gd_resource type="BehaviorTree" format=3 uid="uid://c2u6sljqkim0n"]
 
 [ext_resource type="Script" uid="uid://ccr43pgd4488l" path="res://demo/ai/tasks/get_first_in_group.gd" id="1_08fik"]
 [ext_resource type="Script" uid="uid://ct71h72pech3b" path="res://demo/ai/tasks/select_flanking_pos.gd" id="2_te3yo"]
@@ -32,6 +32,8 @@ min_duration = 0.7
 max_duration = 1.5
 
 [sub_resource type="BTAction" id="BTAction_c4cxo"]
+group = &"player"
+output_var = &"target"
 script = ExtResource("1_08fik")
 group = &"player"
 output_var = &"target"
@@ -51,6 +53,11 @@ blend = 0.1
 speed = 1.5
 
 [sub_resource type="BTAction" id="BTAction_6e48s"]
+target_var = &"target"
+flank_side = 1
+range_min = 400
+range_max = 600
+position_var = &"flank_pos"
 script = ExtResource("2_te3yo")
 target_var = &"target"
 flank_side = 1
@@ -59,6 +66,10 @@ range_max = 600
 position_var = &"flank_pos"
 
 [sub_resource type="BTAction" id="BTAction_66hsk"]
+target_position_var = &"flank_pos"
+speed_var = &"flank_speed"
+tolerance = 50.0
+avoid_var = &"target"
 script = ExtResource("3_svwk8")
 target_position_var = &"flank_pos"
 speed_var = &"flank_speed"
@@ -69,6 +80,7 @@ avoid_var = &"target"
 children = [SubResource("BTAction_66hsk")]
 
 [sub_resource type="BTAction" id="BTAction_enw2m"]
+target_var = &"target"
 script = ExtResource("4_mvsyw")
 target_var = &"target"
 
@@ -92,6 +104,9 @@ animation_name = &"walk"
 blend = 0.1
 
 [sub_resource type="BTAction" id="BTAction_a4jqi"]
+target_var = &"target"
+speed_var = &"speed"
+approach_distance = 100.0
 script = ExtResource("5_r1ou0")
 target_var = &"target"
 speed_var = &"speed"
@@ -102,6 +117,7 @@ children = [SubResource("BTAction_a4jqi")]
 time_limit = 2.0
 
 [sub_resource type="BTAction" id="BTAction_kidxn"]
+target_var = &"target"
 script = ExtResource("4_mvsyw")
 target_var = &"target"
 
@@ -135,6 +151,11 @@ children = [SubResource("BTPlayAnimation_olf37"), SubResource("BTTimeLimit_xek5v
 metadata/_weight_ = 4.0
 
 [sub_resource type="BTAction" id="BTAction_mf87t"]
+target_var = &"target"
+flank_side = 0
+range_min = 350
+range_max = 600
+position_var = &"pos"
 script = ExtResource("2_te3yo")
 target_var = &"target"
 flank_side = 0
@@ -152,6 +173,10 @@ animation_name = &"walk"
 blend = 0.1
 
 [sub_resource type="BTAction" id="BTAction_6nx58"]
+target_position_var = &"pos"
+speed_var = &"speed"
+tolerance = 50.0
+avoid_var = &""
 script = ExtResource("3_svwk8")
 target_position_var = &"pos"
 speed_var = &"speed"
@@ -163,6 +188,7 @@ children = [SubResource("BTAction_6nx58")]
 time_limit = 3.0
 
 [sub_resource type="BTAction" id="BTAction_8q20y"]
+target_var = &"target"
 script = ExtResource("4_mvsyw")
 target_var = &"target"
 

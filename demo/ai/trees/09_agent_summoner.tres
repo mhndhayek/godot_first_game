@@ -1,4 +1,4 @@
-[gd_resource type="BehaviorTree" load_steps=35 format=3 uid="uid://cpxk7jnqpwwlc"]
+[gd_resource type="BehaviorTree" format=3 uid="uid://cpxk7jnqpwwlc"]
 
 [ext_resource type="Script" uid="uid://bicxffqmm7ek" path="res://demo/ai/tasks/select_random_nearby_pos.gd" id="1_sgn0p"]
 [ext_resource type="Script" uid="uid://df82exuqnfdb2" path="res://demo/ai/tasks/arrive_pos.gd" id="2_pshl2"]
@@ -69,6 +69,9 @@ blend = 0.1
 duration = 0.5
 
 [sub_resource type="BTAction" id="BTAction_yeyns"]
+range_min = 300.0
+range_max = 500.0
+position_var = &"minion_pos"
 script = ExtResource("1_sgn0p")
 range_min = 300.0
 range_max = 500.0
@@ -87,7 +90,7 @@ saved_value = NodePath(".")
 [sub_resource type="BTCallMethod" id="BTCallMethod_4ath5"]
 node = SubResource("BBNode_v271m")
 method = &"summon_minion"
-args = Array[BBVariant]([SubResource("BBVariant_wfjwy")])
+args = [SubResource("BBVariant_wfjwy")]
 
 [sub_resource type="BTCooldown" id="BTCooldown_25f70"]
 children = [SubResource("BTCallMethod_4ath5")]
@@ -101,6 +104,9 @@ custom_name = "Summon minion"
 children = [SubResource("BTCheckAgentProperty_olmdj"), SubResource("BTCheckVar_hc3o3"), SubResource("BTPlayAnimation_6leni"), SubResource("BTWait_8og18"), SubResource("BTAction_yeyns"), SubResource("BTCooldown_25f70"), SubResource("BTWait_tdhfn")]
 
 [sub_resource type="BTAction" id="BTAction_33wje"]
+range_min = 300.0
+range_max = 700.0
+position_var = &"pos"
 script = ExtResource("1_sgn0p")
 range_min = 300.0
 range_max = 700.0
@@ -116,6 +122,10 @@ animation_name = &"walk"
 blend = 0.1
 
 [sub_resource type="BTAction" id="BTAction_dfifw"]
+target_position_var = &"pos"
+speed_var = &"speed"
+tolerance = 50.0
+avoid_var = &""
 script = ExtResource("2_pshl2")
 target_position_var = &"pos"
 speed_var = &"speed"

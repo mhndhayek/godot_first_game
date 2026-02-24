@@ -1,4 +1,4 @@
-[gd_resource type="BehaviorTree" load_steps=21 format=3 uid="uid://bpdm5jnegi38"]
+[gd_resource type="BehaviorTree" format=3 uid="uid://bpdm5jnegi38"]
 
 [ext_resource type="Script" uid="uid://ccr43pgd4488l" path="res://demo/ai/tasks/get_first_in_group.gd" id="1_2jpsu"]
 [ext_resource type="Script" uid="uid://dcjgktglb1slf" path="res://demo/ai/tasks/pursue.gd" id="2_h5db5"]
@@ -38,11 +38,16 @@ animation_name = &"walk"
 blend = 0.1
 
 [sub_resource type="BTAction" id="BTAction_ulbrf"]
+group = &"player"
+output_var = &"target"
 script = ExtResource("1_2jpsu")
 group = &"player"
 output_var = &"target"
 
 [sub_resource type="BTAction" id="BTAction_a4jqi"]
+target_var = &"target"
+speed_var = &"speed"
+approach_distance = 100.0
 script = ExtResource("2_h5db5")
 target_var = &"target"
 speed_var = &"speed"
@@ -57,6 +62,7 @@ custom_name = "Pursue player"
 children = [SubResource("BTPlayAnimation_olf37"), SubResource("BTAction_ulbrf"), SubResource("BTTimeLimit_xek5v")]
 
 [sub_resource type="BTAction" id="BTAction_kidxn"]
+target_var = &"target"
 script = ExtResource("3_bpmfp")
 target_var = &"target"
 

@@ -1,4 +1,4 @@
-[gd_resource type="BehaviorTree" load_steps=28 format=3 uid="uid://ylife72ym5et"]
+[gd_resource type="BehaviorTree" format=3 uid="uid://ylife72ym5et"]
 
 [ext_resource type="Script" uid="uid://ccr43pgd4488l" path="res://demo/ai/tasks/get_first_in_group.gd" id="1_657p6"]
 [ext_resource type="Script" uid="uid://ct71h72pech3b" path="res://demo/ai/tasks/select_flanking_pos.gd" id="2_t3udh"]
@@ -35,11 +35,18 @@ custom_name = "Short break"
 children = [SubResource("BTPlayAnimation_ha2ag"), SubResource("BTRandomWait_cedqr")]
 
 [sub_resource type="BTAction" id="BTAction_pp23y"]
+group = &"player"
+output_var = &"target"
 script = ExtResource("1_657p6")
 group = &"player"
 output_var = &"target"
 
 [sub_resource type="BTAction" id="BTAction_pmvd0"]
+target_var = &"target"
+flank_side = 0
+range_min = 500
+range_max = 600
+position_var = &"flank_pos"
 script = ExtResource("2_t3udh")
 target_var = &"target"
 flank_side = 0
@@ -57,6 +64,10 @@ animation_name = &"walk"
 blend = 0.1
 
 [sub_resource type="BTAction" id="BTAction_87mi0"]
+target_position_var = &"flank_pos"
+speed_var = &"speed"
+tolerance = 50.0
+avoid_var = &""
 script = ExtResource("3_u2ra5")
 target_position_var = &"flank_pos"
 speed_var = &"speed"
@@ -72,6 +83,7 @@ custom_name = "Flank target"
 children = [SubResource("BTAction_pp23y"), SubResource("BTAction_pmvd0"), SubResource("BTPlayAnimation_h0poo"), SubResource("BTTimeLimit_is5ag")]
 
 [sub_resource type="BTAction" id="BTAction_q5g4a"]
+target_var = &"target"
 script = ExtResource("4_xwjl7")
 target_var = &"target"
 
@@ -102,6 +114,8 @@ animation_name = &"charge"
 blend = 0.05
 
 [sub_resource type="BTAction" id="BTAction_o18uk"]
+speed_var = &"charge_speed"
+duration = 1.5
 script = ExtResource("5_ucvak")
 speed_var = &"charge_speed"
 duration = 1.5

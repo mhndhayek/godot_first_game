@@ -1,4 +1,4 @@
-[gd_resource type="BehaviorTree" load_steps=39 format=3 uid="uid://cpncl1db8j12f"]
+[gd_resource type="BehaviorTree" format=3 uid="uid://cpncl1db8j12f"]
 
 [ext_resource type="Script" uid="uid://ccr43pgd4488l" path="res://demo/ai/tasks/get_first_in_group.gd" id="1_sf4l8"]
 [ext_resource type="Script" uid="uid://ct71h72pech3b" path="res://demo/ai/tasks/select_flanking_pos.gd" id="2_5nwkp"]
@@ -32,6 +32,8 @@ min_duration = 0.7
 max_duration = 1.5
 
 [sub_resource type="BTAction" id="BTAction_ulbrf"]
+group = &"player"
+output_var = &"target"
 script = ExtResource("1_sf4l8")
 group = &"player"
 output_var = &"target"
@@ -41,6 +43,11 @@ custom_name = "Pause before action"
 children = [SubResource("BTPlayAnimation_qiw21"), SubResource("BTRandomWait_xlud8"), SubResource("BTAction_ulbrf")]
 
 [sub_resource type="BTAction" id="BTAction_85keo"]
+target_var = &"target"
+flank_side = 0
+range_min = 300
+range_max = 400
+position_var = &"pos"
 script = ExtResource("2_5nwkp")
 target_var = &"target"
 flank_side = 0
@@ -58,6 +65,10 @@ animation_name = &"walk"
 blend = 0.1
 
 [sub_resource type="BTAction" id="BTAction_ygjnc"]
+target_position_var = &"pos"
+speed_var = &"speed"
+tolerance = 50.0
+avoid_var = &""
 script = ExtResource("3_3tom2")
 target_position_var = &"pos"
 speed_var = &"speed"
@@ -72,6 +83,7 @@ custom_name = "Align with player"
 children = [SubResource("BTAction_85keo"), SubResource("BTPlayAnimation_olf37"), SubResource("BTTimeLimit_xek5v")]
 
 [sub_resource type="BTAction" id="BTAction_kidxn"]
+target_var = &"target"
 script = ExtResource("4_hi228")
 target_var = &"target"
 
@@ -97,6 +109,8 @@ animation_player = SubResource("BBNode_s8evu")
 animation_name = &"attack_1"
 
 [sub_resource type="BTAction" id="BTAction_u22bc"]
+speed_var = &"charge_speed"
+duration = 0.1
 script = ExtResource("5_au5yc")
 speed_var = &"charge_speed"
 duration = 0.1
@@ -118,6 +132,8 @@ animation_player = SubResource("BBNode_3oljv")
 animation_name = &"attack_2"
 
 [sub_resource type="BTAction" id="BTAction_yuxl3"]
+speed_var = &"charge_speed"
+duration = 0.1
 script = ExtResource("5_au5yc")
 speed_var = &"charge_speed"
 duration = 0.1
@@ -139,6 +155,8 @@ animation_player = SubResource("BBNode_ot40l")
 animation_name = &"attack_3"
 
 [sub_resource type="BTAction" id="BTAction_rwp18"]
+speed_var = &"charge_speed"
+duration = 0.1
 script = ExtResource("5_au5yc")
 speed_var = &"charge_speed"
 duration = 0.1

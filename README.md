@@ -63,14 +63,16 @@ Both commands have been validated and run successfully on this machine.
 
 ## Input Mapping
 
-The following keyboard inputs are configured in `project.godot`:
+Keyboard defaults are defined in `project.godot`. Controller bindings are registered at runtime by `lua_player.gd`.
 
-| Action      | Key         |
-|-------------|-------------|
-| `move_up`   | Arrow Up    |
-| `move_down` | Arrow Down  |
-| `move_left` | Arrow Left  |
-| `move_right`| Arrow Right |
+| Action       | Keyboard       | Xbox Controller          |
+|--------------|----------------|--------------------------|
+| `move_up`    | Arrow Up       | Left stick up            |
+| `move_down`  | Arrow Down     | Left stick down          |
+| `move_left`  | Arrow Left     | Left stick left          |
+| `move_right` | Arrow Right    | Left stick right         |
+| `shoot`      | Space          | A button or B button     |
+| `ui_cancel`  | Escape         | Start button (open menu) |
 
 ## Physics Layers
 
@@ -83,10 +85,32 @@ The following keyboard inputs are configured in `project.godot`:
 | 5     | 2PlayerH      |
 | 6     | Roof          |
 
+## Running Tests
+
+Automated integration tests live in `tests/run_tests.gd` and cover the fireball system and controller bindings.
+
+**Run the test suite (headless, no window):**
+```bash
+"E:\Godot_v4.6.1-stable_win64_console.exe" --path "E:\Dev\godot_first_game" --headless --script "res://tests/run_tests.gd"
+```
+
+Each test prints `[PASS]` or `[FAIL]` followed by a description. Exit code `0` means all tests passed; exit code `1` means one or more failed.
+
+**What is tested:**
+
+| Suite | Tests |
+|-------|-------|
+| Fireball — `launch()` | Direction normalisation, speed storage, rotation angle |
+| Fireball — `_on_impact()` | `_hit` flag set, idempotency guard |
+| Fireball — node structure | Sprite hframes, sprite scale, collision radius |
+| Controller — InputMap | `shoot` action exists, KEY_SPACE + JOY_BUTTON_A/B bindings |
+| Controller — movement | Left-stick axis bindings for all four move_* actions |
+
+**Architecture note:** The runner extends `SceneTree` and uses `await process_frame` after adding scene nodes so that Godot's deferred `_ready()` calls fire before assertions run.
+
 ## Common Commands
 
 - **Export Project** — Open the editor → *Project* → *Export*, select a platform, and click **Export Project**. Export templates must be downloaded for the matching Godot version.
-- **Run Tests** — The project currently has no automated tests; add them under `tests/` if needed.
 
 ## Addons
 
