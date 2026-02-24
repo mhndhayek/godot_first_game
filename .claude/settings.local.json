@@ -8,7 +8,9 @@
       "Bash(dotnet --version:*)",
       "Bash(\"/e/Godot_v4.6.1-stable_win64_console.exe\" --path \"E:/Dev/godot_first_game\" --headless --quit)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(\"E:\\\\Godot_v4.6.1-stable_win64_console.exe\" --path \"E:\\\\Dev\\\\godot_first_game\")",
+      "Bash(python3:*)"
     ],
     "additionalDirectories": [
       "e:\\Dev\\godot_first_game\\scripts"

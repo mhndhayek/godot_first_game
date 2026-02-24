@@ -25,8 +25,15 @@ godot_first_game/
 ├── Simulator.tscn                   # MAIN SCENE (entry point)
 ├── Scenes/
 │   ├── Player.tscn                  # Simple player (lua_player.gd)
-│   └── World.tscn                   # Wraps Simulator.tscn
-├── scripts/lua/lua_player.gd        # Player movement + animation (CharacterBody2D)
+│   ├── World.tscn                   # Wraps Simulator.tscn
+│   └── WorldGen.tscn                # Procedurally generated open world (200×200 tiles)
+├── scripts/
+│   ├── lua/lua_player.gd            # Player movement + animation (CharacterBody2D)
+│   ├── ui/start_menu.gd             # Menu (Start, World, Options, Quit)
+│   ├── projectiles/fireball.gd      # Fireball projectile
+│   └── world/
+│       ├── world_generator.gd       # class_name WorldGenerator — pure generation logic
+│       └── world_gen_root.gd        # WorldGen.tscn root: wires layers → generator → player
 ├── demo/
 │   ├── agents/scripts/agent_base.gd # Base class for all combat agents
 │   ├── agents/player/player.gd      # Combat player (extends agent_base)
@@ -120,9 +127,29 @@ Switch Claude's active role with a slash command:
 # Validate project (no window):
 "E:\Godot_v4.6.1-stable_win64_console.exe" --path "E:\Dev\godot_first_game" --headless --quit
 
+# Run all tests (Fireball + Controller + WorldGenerator):
+"E:\Godot_v4.6.1-stable_win64_console.exe" --path "E:\Dev\godot_first_game" --headless --script "res://tests/run_tests.gd"
+
 # Run game:
 "E:\Godot_v4.6.1-stable_win64_console.exe" --path "E:\Dev\godot_first_game"
 ```
+
+## WorldGen Notes
+- **World size:** 200×200 tiles × 8px/tile = 1600×1600 logical px (6400×6400px on screen)
+- **Entry:** Main menu "World" button → `WorldGen.tscn` → generates fresh world each load
+- **Regenerate:** Press Escape in-world → menu → "World" again → new seed → new world
+- **Menu label:** "Start" becomes "Resume" automatically when inside WorldGen
+- **Prop scales:** All sprite scales are initial estimates — require in-game visual test before sign-off
+- **Enemy sprites (placeholder):** Monster spawns use red-tinted Female Adventurer sprite.
+  To use proper enemy sprites: `git restore demo/assets/` then copy sprites to `assets/enemies/`
+
+## Sprite Sizing Rule
+**Every new visual element must be sized relative to the player before shipping.**
+- Player reference: `CollisionShape2D` is **10×18 px** at 1× scale (world pixels)
+- New sprites must not appear larger than the player at their initial scale
+- Default starting scale for unknown assets: **`Vector2(0.5, 0.5)`** — adjust after in-game visual test
+- Do NOT use `Vector2(1.0, 1.0)` or larger for a new asset without first checking its source PNG dimensions
+- Scale the `CollisionShape2D` to match the visible sprite footprint, not the full PNG canvas
 
 ## What NOT to Do
 - Do not edit `project.godot` manually — use the Godot editor UI
@@ -131,3 +158,4 @@ Switch Claude's active role with a slash command:
 - Do not modify the `demo/` directory for game features — treat it as read-only reference
 - Do not create utility helpers for one-time use — keep it simple
 - Do not use `_process()` for physics — always use `_physics_process()` for movement
+- Do not invent Godot UIDs in `.tscn` files — omit `uid=` on new `ext_resource` lines and let the editor assign real UIDs on first open

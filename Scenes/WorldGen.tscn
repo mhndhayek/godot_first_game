@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://worldgen_scene_01"]
+
+[ext_resource type="Script" path="res://scripts/world/world_gen_root.gd" id="1_root"]
+[ext_resource type="PackedScene" uid="uid://becutloh7jq67" path="res://Scenes/Player.tscn" id="2_player"]
+
+[node name="WorldGen" type="Node2D"]
+script = ExtResource("1_root")
+
+[node name="Ground" type="TileMapLayer" parent="."]
+
+[node name="Water" type="TileMapLayer" parent="."]
+
+[node name="Props" type="Node2D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]

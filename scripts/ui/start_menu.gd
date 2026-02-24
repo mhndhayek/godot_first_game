@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 signal start_pressed
+signal world_pressed
 signal quit_pressed
 
 const NORMAL_COLOR := Color(0.85, 0.85, 0.85, 1.0)
@@ -57,12 +58,14 @@ func _build_ui() -> void:
 	vbox.add_child(spacer)
 
 	var label_start := _make_item("Start", vh)
+	var label_world := _make_item("World", vh)
 	var label_options := _make_item("Options", vh)
 	var label_quit := _make_item("Quit", vh)
 	vbox.add_child(label_start)
+	vbox.add_child(label_world)
 	vbox.add_child(label_options)
 	vbox.add_child(label_quit)
-	_items = [label_start, label_options, label_quit]
+	_items = [label_start, label_world, label_options, label_quit]
 
 
 func _make_item(text: String, vh: float) -> Label:
@@ -94,14 +97,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		_update_highlight()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_accept") and not event.is_echo():
-		_confirm_selection()
 		get_viewport().set_input_as_handled()
+		_confirm_selection()
 	elif event is InputEventMouseMotion:
 		_check_mouse_hover(event.position)
 	elif event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			_check_mouse_click(event.position)
 			get_viewport().set_input_as_handled()
+			_check_mouse_click(event.position)
 
 
 func _check_mouse_hover(mouse_pos: Vector2) -> void:
@@ -128,9 +131,15 @@ func _confirm_selection() -> void:
 		0:
 			start_pressed.emit()
 		1:
-			pass  # Options — not yet implemented
+			world_pressed.emit()
 		2:
+			pass  # Options — not yet implemented
+		3:
 			quit_pressed.emit()
+
+
+func set_resume_mode(enabled: bool) -> void:
+	_items[0].text = "Resume" if enabled else "Start"
 
 
 func show_menu() -> void:
