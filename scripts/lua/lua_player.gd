@@ -25,6 +25,7 @@ func _ready() -> void:
 	_menu = _START_MENU_SCRIPT.new()
 	add_child(_menu)
 	_menu.start_pressed.connect(_on_menu_start)
+	_menu.world_pressed.connect(_on_menu_world)
 	_menu.quit_pressed.connect(_on_menu_quit)
 	_menu.show_menu()
 
@@ -80,6 +81,10 @@ func set_menu_mode(enabled: bool) -> void:
 	menu_mode = enabled
 
 
+func set_resume_mode(enabled: bool) -> void:
+	_menu.set_resume_mode(enabled)
+
+
 # ---------- Combat ----------
 
 func _shoot() -> void:
@@ -95,6 +100,10 @@ func _on_menu_start() -> void:
 	_game_started = true
 	menu_mode = false
 	_menu.hide_menu()
+
+
+func _on_menu_world() -> void:
+	get_tree().change_scene_to_file("res://Scenes/WorldGen.tscn")
 
 
 func _on_menu_quit() -> void:

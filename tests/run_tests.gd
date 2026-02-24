@@ -1,4 +1,4 @@
-# tests/run_tests.gd — Integration tests for Fireball and Controller systems.
+# tests/run_tests.gd — Integration tests for Fireball, Controller, and WorldGenerator systems.
 #
 # Run headless:
 #   "E:\Godot_v4.6.1-stable_win64_console.exe" --path "E:\Dev\godot_first_game" --headless --script "res://tests/run_tests.gd"
@@ -15,6 +15,7 @@ extends SceneTree
 
 const _FIREBALL := preload("res://scripts/projectiles/fireball.gd")
 const _PLAYER_SCENE := preload("res://Scenes/Player.tscn")
+const _WORLD_GENERATOR := preload("res://scripts/world/world_generator.gd")
 
 
 func _initialize() -> void:
@@ -95,6 +96,26 @@ func _run_tests() -> void:
 		"controller: move_right bound to left-stick right (axis X, positive)")
 
 	player.queue_free()
+
+	# ── WorldGenerator ───────────────────────────────────────────
+	_add(results, labels,
+		_wg_ground_filled(),
+		"world generator: ground layer covers full WORLD_W × WORLD_H tiles")
+	_add(results, labels,
+		_wg_water_placed(),
+		"world generator: water layer has tiles (lakes generated)")
+	_add(results, labels,
+		_wg_beacon_exists(),
+		"world generator: exactly one Beacon prop placed at spawn")
+	_add(results, labels,
+		_wg_chest_count_in_range(),
+		"world generator: chest count is 15–25 (Godot appends numbers to duplicate names)")
+	_add(results, labels,
+		_wg_same_seed_same_spawn(),
+		"world generator: identical seed produces identical spawn tile (deterministic)")
+	_add(results, labels,
+		_wg_spawn_not_in_water(),
+		"world generator: spawn tile has no water cell")
 
 	# ── Report ──────────────────────────────────────────────────
 	print("")
@@ -211,3 +232,80 @@ func _map_has_joyaxis(action: String, axis: JoyAxis, negative: bool) -> bool:
 			if not (e is InputEventJoypadMotion): return false
 			return e.axis == axis and (e.axis_value < 0.0) == negative
 	)
+
+
+# ── WorldGenerator helpers ────────────────────────────────────────────────────
+
+# Creates isolated TileMapLayer + water layer + Props node, runs generate(), returns them.
+func _make_world(seed: int) -> Dictionary:
+	var ground := TileMapLayer.new()
+	var water := TileMapLayer.new()
+	var props := Node2D.new()
+	root.add_child(ground)
+	root.add_child(water)
+	root.add_child(props)
+	var gen := _WORLD_GENERATOR.new()
+	var spawn := gen.generate(ground, water, props, seed)
+	return {"ground": ground, "water": water, "props": props, "gen": gen, "spawn": spawn}
+
+
+func _free_world(d: Dictionary) -> void:
+	(d["ground"] as Node).queue_free()
+	(d["water"] as Node).queue_free()
+	(d["props"] as Node).queue_free()
+
+
+func _wg_ground_filled() -> bool:
+	var d := _make_world(1)
+	# 200 × 200 = 40 000 tiles total; lakes erase some, so check >= 90 %.
+	var expected: int = _WORLD_GENERATOR.WORLD_W * _WORLD_GENERATOR.WORLD_H
+	var count: int = (d["ground"] as TileMapLayer).get_used_cells().size()
+	_free_world(d)
+	return count >= int(expected * 0.9)
+
+
+func _wg_water_placed() -> bool:
+	var d := _make_world(2)
+	var count: int = (d["water"] as TileMapLayer).get_used_cells().size()
+	_free_world(d)
+	return count > 0
+
+
+func _wg_beacon_exists() -> bool:
+	var d := _make_world(3)
+	var props := d["props"] as Node2D
+	var beacon_count := 0
+	for child in props.get_children():
+		if child.name == "Beacon":
+			beacon_count += 1
+	_free_world(d)
+	return beacon_count == 1
+
+
+func _wg_chest_count_in_range() -> bool:
+	var d := _make_world(4)
+	# Read internal counter via get() — same pattern used for fireball tests.
+	# Avoids relying on Godot's auto-renaming of duplicate node names.
+	var count: int = d["gen"].get("_chest_count")
+	_free_world(d)
+	# Generator targets 25; range 15–25 allows for rare placement failures.
+	return count >= 15 and count <= 25
+
+
+func _wg_same_seed_same_spawn() -> bool:
+	var d1 := _make_world(42)
+	var spawn1: Vector2i = d1["spawn"]
+	_free_world(d1)
+	var d2 := _make_world(42)
+	var spawn2: Vector2i = d2["spawn"]
+	_free_world(d2)
+	return spawn1 == spawn2
+
+
+func _wg_spawn_not_in_water() -> bool:
+	var d := _make_world(5)
+	var water := d["water"] as TileMapLayer
+	var spawn: Vector2i = d["spawn"]
+	var cell_id: int = water.get_cell_source_id(spawn)
+	_free_world(d)
+	return cell_id == -1  # -1 means no tile at that position

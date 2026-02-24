@@ -83,6 +83,12 @@ func _on_impact() -> void:
 		return
 	_hit = true
 
+	# Check if a chest was hit and open it.
+	for i in get_slide_collision_count():
+		var collider := get_slide_collision(i).get_collider()
+		if collider and collider.has_method("open"):
+			collider.open()
+
 	var puff := _SMOKE_SCRIPT.new()
 	# Add puff to the fireball's parent so it outlives the fireball node.
 	get_parent().add_child(puff)
