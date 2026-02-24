@@ -97,14 +97,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		_update_highlight()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_accept") and not event.is_echo():
-		_confirm_selection()
 		get_viewport().set_input_as_handled()
+		_confirm_selection()
 	elif event is InputEventMouseMotion:
 		_check_mouse_hover(event.position)
 	elif event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			_check_mouse_click(event.position)
 			get_viewport().set_input_as_handled()
+			_check_mouse_click(event.position)
 
 
 func _check_mouse_hover(mouse_pos: Vector2) -> void:

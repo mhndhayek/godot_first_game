@@ -24,10 +24,11 @@ const _PATH_WATER := "res://assets/Nature & village pack - ACT 1/Nature/Grounds/
 const _PATH_TREE_MINI := "res://assets/Nature & village pack - ACT 1/Nature/mini trees.png"
 const _PATH_TREE_NORMAL := "res://assets/Nature & village pack - ACT 1/Nature/normal trees.png"
 const _PATH_TREE_TALL := "res://assets/Nature & village pack - ACT 1/Nature/tall trees.png"
-const _PATH_CHEST := "res://assets/Nature & village pack - ACT 1/Chest/Fixed/idle.png"
+const _PATH_ROCKS := "res://assets/Nature & village pack - ACT 1/Nature/Rocks.png"
 const _PATH_TENT := "res://assets/Nature & village pack - ACT 1/Containers & Tents/Tents.png"
 const _PATH_CAMPFIRE := "res://assets/Nature & village pack - ACT 1/Containers & Tents/Campfire.png"
 const _PATH_WALK := "res://assets/The Female Adventurer - Free/The Female Adventurer - Free/Walk/walk.png"
+const _PATH_CHEST_SCENE := "res://Scenes/Chest.tscn"
 
 # Tree spritesheet layout: 384×192px, assumed 8 columns × 4 rows = 32 variants
 const _TREE_HFRAMES: int = 8
@@ -35,6 +36,12 @@ const _TREE_VFRAMES: int = 4
 
 # Campfire spritesheet: 192×32px = 6 frames × 32px each
 const _CAMPFIRE_HFRAMES: int = 6
+const _CAMPFIRE_FRAME_SIZE: int = 32
+
+# Rocks spritesheet: 208×96px = 13 columns × 6 rows of 16×16px each
+const _ROCK_HFRAMES: int = 13
+const _ROCK_VFRAMES: int = 6
+const _ROCK_FRAME_SIZE: int = 16
 
 var _rng := RandomNumberGenerator.new()
 
@@ -69,6 +76,7 @@ func generate(
 	var spawn_tile := _find_spawn(lake_centers)
 	_place_campfire(props, spawn_tile)
 	_scatter_trees(water, props)
+	_scatter_rocks(water, props)
 	_scatter_chests(water, props)
 	_scatter_tents(water, props)
 	_scatter_monsters(water, props)
@@ -176,27 +184,37 @@ func _is_safe_spawn(tile: Vector2i, lake_centers: Array[Vector2i]) -> bool:
 
 # ── Prop placement helpers ────────────────────────────────────────────────────
 
+# Campfire: 192×32px = 6 frames of 32×32px. Animated via AnimatedSprite2D.
 func _place_campfire(props: Node2D, spawn_tile: Vector2i) -> void:
-	# Campfire.png: 192×32px = 6 frames of 32×32px each.
-	# Target: ~16px logical (≈ player width). scale = 16/32 = 0.5.
-	# Require visual test before sign-off.
-	var sprite := _make_sprite(
-		_PATH_CAMPFIRE,
-		Vector2(0.5, 0.5),
-		_CAMPFIRE_HFRAMES, 1
-	)
-	sprite.name = "Beacon"
-	sprite.position = get_world_position(spawn_tile)
-	props.add_child(sprite)
+	var tex: Texture2D = load(_PATH_CAMPFIRE)
+	var anim := AnimatedSprite2D.new()
+	anim.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	anim.scale = Vector2(0.5, 0.5)
+
+	var frames := SpriteFrames.new()
+	frames.add_animation("burn")
+	frames.set_animation_loop("burn", true)
+	frames.set_animation_speed("burn", 8.0)
+	for i in _CAMPFIRE_HFRAMES:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = tex
+		atlas.region = Rect2(i * _CAMPFIRE_FRAME_SIZE, 0, _CAMPFIRE_FRAME_SIZE, _CAMPFIRE_FRAME_SIZE)
+		frames.add_frame("burn", atlas)
+
+	anim.sprite_frames = frames
+	anim.name = "Beacon"
+	anim.position = get_world_position(spawn_tile)
+	props.add_child(anim)
+	anim.play("burn")
 	_occupied[spawn_tile] = true
 
 
+# Trees: 384×192px strip, 8×4 frames = 32 variants.
+# Each tree is a StaticBody2D (collision_layer 1) so the player is blocked.
 func _scatter_trees(water: TileMapLayer, props: Node2D) -> void:
-	# mini/normal/tall trees.png: 384×192px, 8 hframes × 4 vframes = 32 variants.
-	# mini target: 32px logical → scale ≈ 32/48 ≈ 0.67 (frame assumed 48×48px).
-	# Require visual test before sign-off.
 	var tree_paths := [_PATH_TREE_MINI, _PATH_TREE_NORMAL, _PATH_TREE_TALL]
-	var tree_scales := [Vector2(0.67, 0.67), Vector2(0.83, 0.83), Vector2(1.04, 1.04)]
+	# Start at 0.5 per sizing rule — adjust after in-game visual test.
+	var tree_scales := [Vector2(0.5, 0.5), Vector2(0.5, 0.5), Vector2(0.5, 0.5)]
 	var count := 350
 
 	for _i in count:
@@ -204,27 +222,60 @@ func _scatter_trees(water: TileMapLayer, props: Node2D) -> void:
 		if tile == Vector2i(-1, -1):
 			continue
 		var kind := _rng.randi() % 3
+
+		var body := _make_solid_body("Tree", get_world_position(tile))
 		var sprite := _make_sprite(tree_paths[kind], tree_scales[kind], _TREE_HFRAMES, _TREE_VFRAMES)
-		sprite.name = "Tree"
 		sprite.frame = _rng.randi() % (_TREE_HFRAMES * _TREE_VFRAMES)
-		sprite.position = get_world_position(tile)
-		props.add_child(sprite)
+		body.add_child(sprite)
+
+		var col := _make_circle_col(3.0, Vector2(0.0, 2.0))
+		body.add_child(col)
+
+		props.add_child(body)
 		_mark_radius(tile, 2)
 		_tree_count += 1
 
 
+# Rocks: 208×96px = 13 cols × 6 rows of 16×16px. StaticBody2D with collision.
+func _scatter_rocks(water: TileMapLayer, props: Node2D) -> void:
+	var tex: Texture2D = load(_PATH_ROCKS)
+	var count := 120
+
+	for _i in count:
+		var tile := _random_dry_tile(water)
+		if tile == Vector2i(-1, -1):
+			continue
+
+		var body := _make_solid_body("Rock", get_world_position(tile))
+
+		var sprite := Sprite2D.new()
+		sprite.texture = tex
+		sprite.hframes = _ROCK_HFRAMES
+		sprite.vframes = _ROCK_VFRAMES
+		sprite.frame = _rng.randi() % (_ROCK_HFRAMES * _ROCK_VFRAMES)
+		# 16px frame × 0.5 = 8px on screen — pebble-sized, within player hitbox.
+		sprite.scale = Vector2(0.5, 0.5)
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		body.add_child(sprite)
+
+		var col := _make_circle_col(3.5, Vector2.ZERO)
+		body.add_child(col)
+
+		props.add_child(body)
+		_occupied[tile] = true
+
+
+# Chests: instantiate Chest.tscn (StaticBody2D + AnimatedSprite2D + collision).
 func _scatter_chests(water: TileMapLayer, props: Node2D) -> void:
-	# Fixed/idle.png: 32×32px single frame.
-	# Target: 16px logical (≈ player width). scale = 16/32 = 0.5.
-	# Require visual test before sign-off.
+	var chest_scene: PackedScene = load(_PATH_CHEST_SCENE)
 	for _i in 25:
 		var tile := _random_dry_tile(water)
 		if tile == Vector2i(-1, -1):
 			continue
-		var sprite := _make_sprite(_PATH_CHEST, Vector2(0.5, 0.5), 1, 1)
-		sprite.name = "Chest"
-		sprite.position = get_world_position(tile)
-		props.add_child(sprite)
+		var chest: Node = chest_scene.instantiate()
+		chest.name = "Chest"
+		chest.position = get_world_position(tile)
+		props.add_child(chest)
 		_occupied[tile] = true
 		_chest_count += 1
 
@@ -267,6 +318,27 @@ func _scatter_monsters(water: TileMapLayer, props: Node2D) -> void:
 		sprite.position = get_world_position(tile)
 		props.add_child(sprite)
 		_occupied[tile] = true
+
+
+# ── Node factories ────────────────────────────────────────────────────────────
+
+# StaticBody2D on layer 1 — blocks player (mask 25 includes layer 1) and fireball.
+func _make_solid_body(body_name: String, world_pos: Vector2) -> StaticBody2D:
+	var body := StaticBody2D.new()
+	body.name = body_name
+	body.collision_layer = 1
+	body.collision_mask = 0
+	body.position = world_pos
+	return body
+
+
+func _make_circle_col(radius: float, offset: Vector2) -> CollisionShape2D:
+	var shape := CircleShape2D.new()
+	shape.radius = radius
+	var col := CollisionShape2D.new()
+	col.shape = shape
+	col.position = offset
+	return col
 
 
 # ── Sprite factory ────────────────────────────────────────────────────────────
