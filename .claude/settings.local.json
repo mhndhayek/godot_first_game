@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(where:*)",
+      "Bash(powershell -command:*)",
+      "Read(//e//**)",
+      "Bash(dotnet --version:*)",
+      "Bash(\"/e/Godot_v4.6.1-stable_win64_console.exe\" --path \"E:/Dev/godot_first_game\" --headless --quit)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "additionalDirectories": [
+      "e:\\Dev\\godot_first_game\\scripts"
+    ]
+  }
+}
